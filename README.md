@@ -283,9 +283,101 @@ Date:   Tue Mar 28 00:26:53 2023 +0300
 * staged - после выполнения команды git add файл попадает в staging area. Это список файлов которые войдут в коммит. В этот момент файл находится в состоянии staged. Staging area также называют index или cache.
 * tracked -  это противоположность untracked. Оно довольно широкое по смыслу: в него попадают файлы, которые уже были зафиксированы с помощью git commit, а также файлы, которые были добавлены в staging area командой git add. То есть все файлы, в которых Git так или иначе отслеживает изменения.
 * modified - если файл имеет состояние tracked и изменяется, то он становится modified. Например: файл был добавлен, закоммичен, и после изменен. Если ввести команду git status, то консоль выведет modified.
+Статусы файлов в виде схемы:
+```mermaid
+graph LR;
+  untracked -- "git add" --> staged;
+  staged    -- "git commit"     --> tracked/comitted;
+  tracked   -- "Изменение" --> modified;
+``` 
 
+## Как читать Git статус
+Чтобы не запутаться с файловыми операциями, нужно проверять статус командой git status.
+git status показывает только следующие состояния файлов:
+* staged (Changes to be committed в выводе git status);
+* modified (Changes not staged for commit);
+* untracked (Untracked files).
+Статус tracked не отображается для емкости вывода.
+Рассмотрим 4 примера состояний:
+* Если ничего не менять в репозитории после первого коммита, то команда git status выведет следующее:
+```
+$ git status
+On branch master
+nothing to commit, working tree clean
+```
+Это значит что рабочая директория чиста.
+* Если создать в директории файл и ничего с ним больше не делать, то git status выведет следующее:
+```
+$ touch fileA.txt
+$ git status
+On branch master
+Untracked files: # найдены неотслеживаемые файлы
+  (use "git add <file>..." to include in what will be committed)
+        fileA.txt
 
+nothing added to commit but untracked files present (use "git add" to track)  
+```
+Теперь в репозитории есть неотслеживаемый файл. Если созданный файл довабить в staging area командой git add, то git status выведет следующее:
+```
+$ git add fileA.txt 
+$ git status
+On branch master
+Changes to be committed: # новая секция
+  (use "git restore --staged <file>..." to unstage)
+        new file:   fileA.txt 
+```
+Консоль говорит о том, что изменения могут быть закоммичены и файл в состоянии staged. Если закоммитить файл, то в репозитории будет зафиксирована текущая версия файла. Git status выведет, что рабочая директория чиста.
+* Если изменить файл и сохранить его без гита, то команда git status выведет следующее:
+```
+# внесли в fileA.txt правки
+# запросили статус
+$ git status 
+On branch master
+Changes not staged for commit: # ещё одна секция
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   fileA.txt 
+```
+Состояние файла теперь modified. Чтобы изменить это, нужно снова добавить файл в staging area.
+* Если файл в staging area и мы его снова изменим, то команда git status выведет следующее:
+```
+$ git status
+On branch master
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+          modified:   fileA.txt
 
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+          modified:   fileA.txt 
+```
+Файл находится в двух состояниях: staged и modified. Чтобы изменить это состояние, нужно выполнить команду git add, файл станет staged.
+
+## Стили оформления коммитов.
+Оформлять коммиты нужно информативно и коротко и читаемо.
+Популярные стили оформления коммитов:
+* Корпоративный. Компании применяют в работе Jira - система для организации проектов и задач. У каждой задачи в Jira есть идентификатор из нескольких заглавных латинских букв и номера. Пример:
+```
+$ git commit -m "LGS-239: Дополнить список пасхалок новыми числами" 
+```
+* Сonventional Commits. Это стандарт, который применяют, работая с исходным кодом. Conventional Commits предлагает такой формат коммита: <type>: <сообщение>. Пример: 
+```
+git commit -m "feat: добавить подсчёт суммы заказов за неделю" 
+```
+* Github стиль. Если коммит «закрывает» или «решает» какую-то задачу, то в его сообщении удобно указывать ссылку на неё. Для этого в любом месте сообщения нужно указать #<номер задачи>. Пример:
+```
+$ git commit -m "Исправить #334, добавить график температуры" 
+```
+Github свяжет коммит и задачу.
+```
+Инфинитив и императив
+Для сообщений на русском языке часто рекомендуют использовать инфинитивы. Например: Добавить тесты для PipkaService, Исправить ошибку #123 и так далее.
+
+Для сообщений на английском рекомендуется использовать повелительное наклонение (англ. imperative). Например: Use library mega_lib_300, Fix exit button и так далее.
+
+Эти рекомендации сложились исторически, и им следуют многие проекты.
+```
 
 # Шпаргалка markdown
 
@@ -314,7 +406,7 @@ git init
 ```
 ## Ссылки
 Пример ссылки:<br>
-[Youtube](https://www.youtube.com "Ютуб") am
+[Youtube](https://www.youtube.com "Ютуб") 
 
 
                         
